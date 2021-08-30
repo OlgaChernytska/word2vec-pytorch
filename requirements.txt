@@ -1,0 +1,4 @@
+nb-black==1.0.7
+numpy==1.19.5
+torch==1.9.0
+torchtext==0.10.0
