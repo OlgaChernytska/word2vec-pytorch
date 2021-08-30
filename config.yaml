@@ -1,0 +1,11 @@
+dataset: WikiText2
+data_dir: data/
+train_batch_size: 500
+val_batch_size: 500
+
+learning_rate: 0.025
+epochs: 2
+train_steps: 10
+val_steps: 10
+
+model_dir: weights/
