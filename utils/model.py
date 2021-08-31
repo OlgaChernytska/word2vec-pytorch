@@ -11,6 +11,6 @@ class CBOW_Model(nn.Module):
 
     def forward(self, inputs_):
         x = self.linear1(inputs_)
-        x = x.sum(axis=1)
+        x = x.mean(axis=1)
         x = self.linear2(x)
         return x

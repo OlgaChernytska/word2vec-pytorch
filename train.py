@@ -4,6 +4,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 
 from utils.model import CBOW_Model
@@ -19,7 +20,7 @@ def train(config):
         vocab=None,
     )
     train_dataloader = DataLoader(
-        train_dataset, batch_size=500, shuffle=True, drop_last=True
+        train_dataset, batch_size=config["train_batch_size"], shuffle=True, drop_last=True
     )
 
     val_dataset = CBOW_Dataset(
@@ -29,7 +30,7 @@ def train(config):
         vocab=train_dataset.vocab,
     )
     val_dataloader = DataLoader(
-        val_dataset, batch_size=500, shuffle=True, drop_last=True
+        val_dataset, batch_size=config["val_batch_size"], shuffle=True, drop_last=True
     )
 
     print("Train Dataset Size:", train_dataset.__len__())
@@ -42,6 +43,12 @@ def train(config):
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=config["learning_rate"])
+    lr_scheduler = ReduceLROnPlateau(
+        optimizer,
+        factor=config["lr_scheduler_factor"],
+        patience=config["lr_scheduler_patience"],
+        verbose=True,
+    )
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     trainer = Trainer(
@@ -53,6 +60,8 @@ def train(config):
         val_steps=config["val_steps"],
         criterion=criterion,
         optimizer=optimizer,
+        lr_scheduler=lr_scheduler,
+        early_stopping_wait=config['early_stopping_wait'],
         device=device,
     )
 
@@ -63,6 +72,9 @@ def train(config):
     trainer.save_model(model_path)
     print("Model saved to:", model_path)
     
+    vocab_path = os.path.join(config["model_dir"], "vocab.pt")
+    torch.save(train_dataset.vocab, vocab_path)
+    print("Vocabulary saved to:", vocab_path)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

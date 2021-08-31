@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+from utils.helper import EarlyStopping
 
 
 class Trainer:
@@ -13,6 +14,8 @@ class Trainer:
         val_steps,
         criterion,
         optimizer,
+        lr_scheduler,
+        early_stopping_wait,
         device,
     ):
         self.model = model
@@ -23,9 +26,12 @@ class Trainer:
         self.val_steps = val_steps
         self.criterion = criterion
         self.optimizer = optimizer
+        self.lr_scheduler = lr_scheduler
+        self.early_stopper = EarlyStopping(epochs_wait=early_stopping_wait)
         self.device = device
 
         self.loss = {"train": [], "val": []}
+        self.model.to(self.device)
 
     def train(self):
         for epoch_num in range(self.epochs):
@@ -39,6 +45,11 @@ class Trainer:
                     self.loss["val"][-1],
                 )
             )
+            self.lr_scheduler.step(self.loss["train"][-1])
+
+            self.early_stopper.step(self.loss["val"][-1])
+            if self.early_stopper.is_stop():
+                break
 
     def _train_epoch(self):
         self.model.train()
