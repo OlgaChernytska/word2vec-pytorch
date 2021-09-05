@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import torch
 from utils.helper import EarlyStopping
@@ -12,11 +13,14 @@ class Trainer:
         train_steps,
         val_dataloader,
         val_steps,
+        checkpoint_frequency,
         criterion,
         optimizer,
         lr_scheduler,
         early_stopping_wait,
         device,
+        model_dir,
+        model_name,
     ):
         self.model = model
         self.epochs = epochs
@@ -26,9 +30,12 @@ class Trainer:
         self.val_steps = val_steps
         self.criterion = criterion
         self.optimizer = optimizer
+        self.checkpoint_frequency = checkpoint_frequency
         self.lr_scheduler = lr_scheduler
         self.early_stopper = EarlyStopping(epochs_wait=early_stopping_wait)
         self.device = device
+        self.model_dir = model_dir
+        self.model_name = model_name
 
         self.loss = {"train": [], "val": []}
         self.model.to(self.device)
@@ -45,7 +52,15 @@ class Trainer:
                     self.loss["val"][-1],
                 )
             )
+
             self.lr_scheduler.step(self.loss["train"][-1])
+
+            if (epoch_num + 1) % self.checkpoint_frequency == 0:
+                model_path = "{}_model_{}.pt".format(
+                    self.model_name, str(epoch_num + 1).zfill(3)
+                )
+                model_path = os.path.join(self.model_dir, model_path)
+                self.save_model(model_path)
 
             self.early_stopper.step(self.loss["val"][-1])
             if self.early_stopper.is_stop():
@@ -68,9 +83,10 @@ class Trainer:
             running_loss.append(loss.item())
 
             if i == self.train_steps:
-                epoch_loss = np.mean(running_loss)
-                self.loss["train"].append(epoch_loss)
                 break
+
+        epoch_loss = np.mean(running_loss)
+        self.loss["train"].append(epoch_loss)
 
     def _validate_epoch(self):
         self.model.eval()
@@ -87,9 +103,10 @@ class Trainer:
                 running_loss.append(loss.item())
 
                 if i == self.val_steps:
-                    epoch_loss = np.mean(running_loss)
-                    self.loss["val"].append(epoch_loss)
                     break
+
+        epoch_loss = np.mean(running_loss)
+        self.loss["val"].append(epoch_loss)
 
     def save_model(self, path):
         torch.save(self.model, path)
