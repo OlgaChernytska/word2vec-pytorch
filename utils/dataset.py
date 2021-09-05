@@ -48,15 +48,15 @@ class CBOW_Dataset(Dataset):
         return vocabulary
 
     def __len__(self):
-        return len(self.tokens) - CBOW_N_WORDS + 1
+        return len(self.tokens) - CBOW_N_WORDS * 2
 
     def __getitem__(self, idx):
-        token_sequence = self.tokens[idx : (idx + CBOW_N_WORDS)]
+        token_sequence = self.tokens[idx : (idx + CBOW_N_WORDS * 2 + 1)]
         token_id_sequence = [self.vocab[x] for x in token_sequence]
-        output = token_id_sequence.pop(CBOW_N_WORDS // 2)
+        output = token_id_sequence.pop(CBOW_N_WORDS)
         inputs = token_id_sequence
 
-        inputs_vector = np.zeros((CBOW_N_WORDS - 1, self.vocab_size))
+        inputs_vector = np.zeros((CBOW_N_WORDS * 2, self.vocab_size))
         for i, id_ in enumerate(inputs):
             inputs_vector[i, id_] = 1
 
