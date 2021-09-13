@@ -1,7 +1,7 @@
 import os
 import numpy as np
+import json
 import torch
-from utils.helper import EarlyStopping
 
 
 class Trainer:
@@ -17,7 +17,6 @@ class Trainer:
         criterion,
         optimizer,
         lr_scheduler,
-        early_stopping_wait,
         device,
         model_dir,
         model_name,
@@ -32,7 +31,6 @@ class Trainer:
         self.optimizer = optimizer
         self.checkpoint_frequency = checkpoint_frequency
         self.lr_scheduler = lr_scheduler
-        self.early_stopper = EarlyStopping(epochs_wait=early_stopping_wait)
         self.device = device
         self.model_dir = model_dir
         self.model_name = model_name
@@ -41,30 +39,22 @@ class Trainer:
         self.model.to(self.device)
 
     def train(self):
-        for epoch_num in range(self.epochs):
+        for epoch in range(self.epochs):
             self._train_epoch()
             self._validate_epoch()
             print(
                 "Epoch: {}/{}, Train Loss={:.5f}, Val Loss={:.5f}".format(
-                    epoch_num + 1,
+                    epoch + 1,
                     self.epochs,
                     self.loss["train"][-1],
                     self.loss["val"][-1],
                 )
             )
 
-            self.lr_scheduler.step(self.loss["train"][-1])
+            self.lr_scheduler.step()
 
-            if (epoch_num + 1) % self.checkpoint_frequency == 0:
-                model_path = "{}_model_{}.pt".format(
-                    self.model_name, str(epoch_num + 1).zfill(3)
-                )
-                model_path = os.path.join(self.model_dir, model_path)
-                self.save_model(model_path)
-
-            self.early_stopper.step(self.loss["val"][-1])
-            if self.early_stopper.is_stop():
-                break
+            if (epoch + 1) % self.checkpoint_frequency == 0:
+                self._save_checkpoint(epoch)
 
     def _train_epoch(self):
         self.model.train()
@@ -108,5 +98,20 @@ class Trainer:
         epoch_loss = np.mean(running_loss)
         self.loss["val"].append(epoch_loss)
 
-    def save_model(self, path):
-        torch.save(self.model, path)
+    def _save_checkpoint(self, epoch):
+        model_path = "{}_model_{}.pt".format(self.model_name, str(epoch + 1).zfill(3))
+        model_path = os.path.join(self.model_dir, model_path)
+        torch.save(self.model, model_path)
+
+    def save_model(self):
+        model_path = os.path.join(self.model_dir, f"{self.model_name}_model.pt")
+        torch.save(self.model, model_path)
+
+    def save_vocab(self):
+        vocab_path = os.path.join(self.model_dir, "vocab.pt")
+        torch.save(self.train_dataloader.dataset.vocab, vocab_path)
+
+    def save_loss(self):
+        loss_path = os.path.join(self.model_dir, f"{self.model_name}_loss.json")
+        with open(loss_path, "w") as fp:
+            json.dump(self.loss, fp)

@@ -1,16 +1,12 @@
 dataset: WikiText2
 data_dir: data/
-train_batch_size: 2000
-val_batch_size: 2000
+train_batch_size: 1000
+val_batch_size: 1000
 
 learning_rate: 0.025
-epochs: 500
+epochs: 20
 train_steps: 
-val_steps: 50
+val_steps:
 
-lr_scheduler_factor: 0.5
-lr_scheduler_patience: 5
-early_stopping_wait: 10
-
-checkpoint_frequency: 20
+checkpoint_frequency: 5
 model_dir: weights/
