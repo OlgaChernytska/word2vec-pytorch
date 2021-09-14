@@ -52,17 +52,13 @@ class CBOW_Dataset(Dataset):
 
     def __getitem__(self, idx):
         token_sequence = self.tokens[idx : (idx + CBOW_N_WORDS * 2 + 1)]
-        token_id_sequence = [self.vocab[x] for x in token_sequence]
+        token_id_sequence = self.vocab(token_sequence)
         output = token_id_sequence.pop(CBOW_N_WORDS)
         inputs = token_id_sequence
 
-        inputs_vector = np.zeros((CBOW_N_WORDS * 2, self.vocab_size))
-        for i, id_ in enumerate(inputs):
-            inputs_vector[i, id_] = 1
-
         output = torch.tensor(output, dtype=torch.long)
-        inputs_vector = torch.tensor(inputs_vector, dtype=torch.float32)
-        return inputs_vector, output
+        inputs = torch.tensor(inputs, dtype=torch.long)
+        return inputs, output
     
     
 class SkipGram_Dataset(Dataset):
@@ -116,14 +112,10 @@ class SkipGram_Dataset(Dataset):
 
     def __getitem__(self, idx):
         token_sequence = self.tokens[idx : (idx + SKIPGRAM_N_WORDS * 2 + 1)]
-        token_id_sequence = [self.vocab[x] for x in token_sequence]
-
+        token_id_sequence = self.vocab(token_sequence)
         input_ = token_id_sequence[SKIPGRAM_N_WORDS]
         output = np.random.choice(token_id_sequence, p=self.token_probs)
 
-        input_vector = np.zeros((self.vocab_size))
-        input_vector[input_] = 1
-
         output = torch.tensor(output, dtype=torch.long)
-        input_vector = torch.tensor(input_vector, dtype=torch.float32)
-        return input_vector, output
+        input_ = torch.tensor(input_, dtype=torch.long)
+        return input_, output

@@ -53,7 +53,7 @@ class Trainer:
 
             self.lr_scheduler.step()
 
-            if (epoch + 1) % self.checkpoint_frequency == 0:
+            if self.checkpoint_frequency:
                 self._save_checkpoint(epoch)
 
     def _train_epoch(self):
@@ -99,9 +99,11 @@ class Trainer:
         self.loss["val"].append(epoch_loss)
 
     def _save_checkpoint(self, epoch):
-        model_path = "{}_model_{}.pt".format(self.model_name, str(epoch + 1).zfill(3))
-        model_path = os.path.join(self.model_dir, model_path)
-        torch.save(self.model, model_path)
+        epoch_num = epoch + 1
+        if epoch_num % self.checkpoint_frequency == 0:
+            model_path = "{}_model_{}.pt".format(self.model_name, str(epoch_num).zfill(3))
+            model_path = os.path.join(self.model_dir, model_path)
+            torch.save(self.model, model_path)
 
     def save_model(self):
         model_path = os.path.join(self.model_dir, f"{self.model_name}_model.pt")

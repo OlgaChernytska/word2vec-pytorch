@@ -3,10 +3,11 @@ data_dir: data/
 train_batch_size: 1000
 val_batch_size: 1000
 
+optimizer: Adam
 learning_rate: 0.025
-epochs: 20
+epochs: 10
 train_steps: 
-val_steps:
+val_steps: 
 
-checkpoint_frequency: 5
-model_dir: weights/
+checkpoint_frequency: 
+model_dir: weights/skipgram_WikiText2

@@ -3,26 +3,22 @@ import yaml
 import os
 import torch
 import torch.nn as nn
-import torch.optim as optim
-from torch.optim.lr_scheduler import LambdaLR
 from torch.utils.data import DataLoader
-
-from utils.model import CBOW_Model, SkipGram_Model
-from utils.dataset import CBOW_Dataset, SkipGram_Dataset
 from utils.trainer import Trainer
+from utils.helper import (
+    get_dataset_class,
+    get_model_class,
+    get_optimizer_class,
+    get_lr_scheduler,
+    save_to_yaml,
+)
 
 
 def train(config, model_name):
-
-    if model_name == "cbow":
-        dataset_class = CBOW_Dataset
-        model_class = CBOW_Model
-    elif model_name == "skipgram":
-        dataset_class = SkipGram_Dataset
-        model_class = SkipGram_Model
-    else:
-        raise ValueError("Choose model_name from: cbow, skipgram")
-        return
+    os.makedirs(config["model_dir"])
+    
+    dataset_class = get_dataset_class(model_name)
+    model_class = get_model_class(model_name)
 
     train_dataset = dataset_class(
         name=config["dataset"],
@@ -36,7 +32,6 @@ def train(config, model_name):
         shuffle=True,
         drop_last=True,
     )
-
     val_dataset = dataset_class(
         name=config["dataset"],
         set_type="valid",
@@ -54,12 +49,13 @@ def train(config, model_name):
 
     model = model_class(vocab_size=vocab_size)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=config["learning_rate"])
 
-    lr_lambda = lambda epoch: (config["epochs"] - epoch) / config["epochs"]
-    lr_scheduler = LambdaLR(optimizer, lr_lambda=lr_lambda, verbose=True)
+    optimizer_class = get_optimizer_class(config["optimizer"])
+    optimizer = optimizer_class(model.parameters(), lr=config["learning_rate"])
+    lr_scheduler = get_lr_scheduler(optimizer, config["epochs"], verbose=True)
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+    
     trainer = Trainer(
         model=model,
         epochs=config["epochs"],
@@ -78,11 +74,13 @@ def train(config, model_name):
 
     trainer.train()
     print("Training finished.")
-    
+
     trainer.save_model()
     trainer.save_loss()
     trainer.save_vocab()
-    print("Model saved to folder:", config["model_dir"])
+    save_to_yaml(config, config["model_dir"])
+    
+    print("Model artifacts saved to folder:", config["model_dir"])
     
     
 if __name__ == '__main__':
