@@ -3,50 +3,46 @@ import yaml
 import os
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader
 from utils.trainer import Trainer
+from utils.dataloader import get_dataloader_and_vocab, build_vocab
+from torchtext.datasets import WikiText2
+from torchtext.data.utils import get_tokenizer
 from utils.helper import (
-    get_dataset_class,
     get_model_class,
     get_optimizer_class,
     get_lr_scheduler,
-    save_to_yaml,
+    save_config,
+    save_vocab,
 )
 
 
-def train(config, model_name):
+def train(config):
     os.makedirs(config["model_dir"])
     
-    dataset_class = get_dataset_class(model_name)
-    model_class = get_model_class(model_name)
-
-    train_dataset = dataset_class(
-        name=config["dataset"],
-        set_type="train",
+    train_dataloader, vocab = get_dataloader_and_vocab(
+        model_name=config["model_name"],
+        ds_name=config["dataset"],
+        ds_type="train",
         data_dir=config["data_dir"],
+        batch_size=config["train_batch_size"],
+        shuffle=config["shuffle"],
         vocab=None,
     )
-    train_dataloader = DataLoader(
-        train_dataset,
-        batch_size=config["train_batch_size"],
-        shuffle=True,
-        drop_last=True,
-    )
-    val_dataset = dataset_class(
-        name=config["dataset"],
-        set_type="valid",
-        data_dir=config["data_dir"],
-        vocab=train_dataset.vocab,
-    )
-    val_dataloader = DataLoader(
-        val_dataset, batch_size=config["val_batch_size"], shuffle=True, drop_last=True
-    )
-    print("Train Dataset Size:", train_dataset.__len__())
-    print("Val Dataset Size:", val_dataset.__len__())
 
-    vocab_size = train_dataset.vocab_size
+    val_dataloader, _ = get_dataloader_and_vocab(
+        model_name=config["model_name"],
+        ds_name=config["dataset"],
+        ds_type="valid",
+        data_dir=config["data_dir"],
+        batch_size=config["val_batch_size"],
+        shuffle=config["shuffle"],
+        vocab=vocab,
+    )
+
+    vocab_size = len(vocab.get_stoi())
     print(f"Vocabulary size: {vocab_size}")
 
+    model_class = get_model_class(config["model_name"])
     model = model_class(vocab_size=vocab_size)
     criterion = nn.CrossEntropyLoss()
 
@@ -55,7 +51,7 @@ def train(config, model_name):
     lr_scheduler = get_lr_scheduler(optimizer, config["epochs"], verbose=True)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
+
     trainer = Trainer(
         model=model,
         epochs=config["epochs"],
@@ -69,7 +65,7 @@ def train(config, model_name):
         lr_scheduler=lr_scheduler,
         device=device,
         model_dir=config["model_dir"],
-        model_name=model_name,
+        model_name=config["model_name"],
     )
 
     trainer.train()
@@ -77,18 +73,16 @@ def train(config, model_name):
 
     trainer.save_model()
     trainer.save_loss()
-    trainer.save_vocab()
-    save_to_yaml(config, config["model_dir"])
-    
+    save_vocab(vocab, config["model_dir"])
+    save_config(config, config["model_dir"])
     print("Model artifacts saved to folder:", config["model_dir"])
     
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, required=True, help='path to yaml config')
-    parser.add_argument('--model_name', type=str, required=True, help='model type')
     args = parser.parse_args()
     
     with open(args.config, 'r') as stream:
         config = yaml.safe_load(stream)
-    train(config, model_name=args.model_name)
+    train(config)

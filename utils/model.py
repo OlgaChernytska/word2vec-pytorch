@@ -1,6 +1,6 @@
 import torch.nn as nn
 
-from utils.constants import EMBED_DIMENSION
+from utils.constants import EMBED_DIMENSION, EMBED_MAX_NORM
 
 
 class CBOW_Model(nn.Module):
@@ -9,6 +9,7 @@ class CBOW_Model(nn.Module):
         self.embeddings = nn.Embedding(
             num_embeddings=vocab_size,
             embedding_dim=EMBED_DIMENSION,
+            max_norm=EMBED_MAX_NORM,
         )
         self.linear = nn.Linear(
             in_features=EMBED_DIMENSION,
@@ -28,6 +29,7 @@ class SkipGram_Model(nn.Module):
         self.embeddings = nn.Embedding(
             num_embeddings=vocab_size,
             embedding_dim=EMBED_DIMENSION,
+            max_norm=EMBED_MAX_NORM,
         )
         self.linear = nn.Linear(
             in_features=EMBED_DIMENSION,
