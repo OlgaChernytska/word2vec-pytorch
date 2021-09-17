@@ -1,11 +1,13 @@
+model_name: skipgram
 dataset: WikiText2
 data_dir: data/
-train_batch_size: 1000
-val_batch_size: 1000
+train_batch_size: 96
+val_batch_size: 96
+shuffle: True
 
 optimizer: Adam
 learning_rate: 0.025
-epochs: 10
+epochs: 5
 train_steps: 
 val_steps: 
 

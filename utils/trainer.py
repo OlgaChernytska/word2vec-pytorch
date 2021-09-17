@@ -5,6 +5,8 @@ import torch
 
 
 class Trainer:
+    """Main class for model training"""
+    
     def __init__(
         self,
         model,
@@ -20,7 +22,7 @@ class Trainer:
         device,
         model_dir,
         model_name,
-    ):
+    ):  
         self.model = model
         self.epochs = epochs
         self.train_dataloader = train_dataloader
@@ -99,21 +101,20 @@ class Trainer:
         self.loss["val"].append(epoch_loss)
 
     def _save_checkpoint(self, epoch):
+        """Save model checkpoint to `self.model_dir` directory"""
         epoch_num = epoch + 1
         if epoch_num % self.checkpoint_frequency == 0:
-            model_path = "{}_model_{}.pt".format(self.model_name, str(epoch_num).zfill(3))
+            model_path = "checkpoint_{}.pt".format(str(epoch_num).zfill(3))
             model_path = os.path.join(self.model_dir, model_path)
             torch.save(self.model, model_path)
 
     def save_model(self):
-        model_path = os.path.join(self.model_dir, f"{self.model_name}_model.pt")
+        """Save final model to `self.model_dir` directory"""
+        model_path = os.path.join(self.model_dir, "model.pt")
         torch.save(self.model, model_path)
 
-    def save_vocab(self):
-        vocab_path = os.path.join(self.model_dir, "vocab.pt")
-        torch.save(self.train_dataloader.dataset.vocab, vocab_path)
-
     def save_loss(self):
-        loss_path = os.path.join(self.model_dir, f"{self.model_name}_loss.json")
+        """Save train/val loss as json file to `self.model_dir` directory"""
+        loss_path = os.path.join(self.model_dir, "loss.json")
         with open(loss_path, "w") as fp:
             json.dump(self.loss, fp)
