@@ -3,10 +3,9 @@ import yaml
 import os
 import torch
 import torch.nn as nn
+
+from utils.dataloader import get_dataloader_and_vocab
 from utils.trainer import Trainer
-from utils.dataloader import get_dataloader_and_vocab, build_vocab
-from torchtext.datasets import WikiText2
-from torchtext.data.utils import get_tokenizer
 from utils.helper import (
     get_model_class,
     get_optimizer_class,

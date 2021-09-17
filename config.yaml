@@ -12,4 +12,4 @@ train_steps:
 val_steps: 
 
 checkpoint_frequency: 
-model_dir: weights/skipgram_WikiText2_t
+model_dir: weights/skipgram_WikiText2

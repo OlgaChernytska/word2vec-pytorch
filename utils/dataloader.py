@@ -35,6 +35,8 @@ def get_data_iterator(ds_name, ds_type, data_dir):
 
 
 def build_vocab(data_iter, tokenizer):
+    """Builds vocabulary from iterator"""
+    
     vocab = build_vocab_from_iterator(
         map(tokenizer, data_iter),
         specials=["<unk>"],
@@ -45,6 +47,19 @@ def build_vocab(data_iter, tokenizer):
 
 
 def collate_cbow(batch, text_pipeline):
+    """
+    Collate_fn for CBOW model to be used with Dataloader.
+    `batch` is expected to be list of text paragrahs.
+    
+    Context is represented as N=CBOW_N_WORDS past words 
+    and N=CBOW_N_WORDS future words.
+    
+    Long paragraphs will be truncated to contain
+    no more that MAX_SEQUENCE_LENGTH tokens.
+    
+    Each element in `batch_input` is N=CBOW_N_WORDS*2 context words.
+    Each element in `batch_output` is a middle word.
+    """
     batch_input, batch_output = [], []
     for text in batch:
         text_tokens_ids = text_pipeline(text)
@@ -68,6 +83,19 @@ def collate_cbow(batch, text_pipeline):
 
 
 def collate_skipgram(batch, text_pipeline):
+    """
+    Collate_fn for Skip-Gram model to be used with Dataloader.
+    `batch` is expected to be list of text paragrahs.
+    
+    Context is represented as N=SKIPGRAM_N_WORDS past words 
+    and N=SKIPGRAM_N_WORDS future words.
+    
+    Long paragraphs will be truncated to contain
+    no more that MAX_SEQUENCE_LENGTH tokens.
+    
+    Each element in `batch_input` is a middle word.
+    Each element in `batch_output` is a context word.
+    """
     batch_input, batch_output = [], []
     for text in batch:
         text_tokens_ids = text_pipeline(text)
