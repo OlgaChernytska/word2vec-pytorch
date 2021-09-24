@@ -3,7 +3,7 @@
 Implementation of the first paper on word2vec - [Efficient Estimation of Word Representations in Vector Space](https://arxiv.org/abs/1301.3781). For detailed explanation of the code here, check my post - Word2vec with PyTorch: Reproducing Original Paper.
 
 ## Word2Vec Overview
----
+
 There 2 model architectures desctibed in the paper:
 
 - Continuous Bag-of-Words Model (CBOW), that predicts word based on its context;
@@ -35,7 +35,7 @@ Difference with the original paper:
 
 
 ## Project Structure
----
+
 
 ```
 .
@@ -64,7 +64,7 @@ Difference with the original paper:
 - **notebooks/Inference.ipynb** - demo of how embeddings are used
 
 ## Usage
----
+
 
 ```
 python3 train.py --config config.yaml
