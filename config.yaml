@@ -1,4 +1,5 @@
-model_name: skipgram
+model_name: cbow
+
 dataset: WikiText2
 data_dir: data/
 train_batch_size: 96
@@ -12,4 +13,4 @@ train_steps:
 val_steps: 
 
 checkpoint_frequency: 
-model_dir: weights/skipgram_WikiText2
+model_dir: weights/cbow_WikiText2
