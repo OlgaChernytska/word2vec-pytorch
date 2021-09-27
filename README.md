@@ -15,7 +15,8 @@ Difference with the original paper:
 - Context for both models is represented as 4 history and 4 future words.
 - For CBOW model averaging for context word embeddings used instead of summation.
 - For Skip-Gram model all context words are sampled with the same probability. 
-- Adam optimizer used instead of Adagrad.
+- Plain Softmax was used instead of Hierarchical Softmax. No Huffman tree used either.
+- Adam optimizer was used instead of Adagrad.
 - Trained for 5 epochs.
 - Regularization applied: embedding vector norms are restricted to 1.
 
