@@ -1,0 +1,13 @@
+checkpoint_frequency: null
+data_dir: data/
+dataset: WikiText2
+epochs: 5
+learning_rate: 0.025
+model_dir: weights/skipgram_WikiText2
+model_name: skipgram
+optimizer: Adam
+shuffle: true
+train_batch_size: 96
+train_steps: null
+val_batch_size: 96
+val_steps: null
