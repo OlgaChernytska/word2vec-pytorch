@@ -1,6 +1,6 @@
 # Word2Vec in PyTorch
 
-Implementation of the first paper on word2vec - [Efficient Estimation of Word Representations in Vector Space](https://arxiv.org/abs/1301.3781). For detailed explanation of the code here, check my post - Word2vec with PyTorch: Reproducing Original Paper.
+Implementation of the first paper on word2vec - [Efficient Estimation of Word Representations in Vector Space](https://arxiv.org/abs/1301.3781). For detailed explanation of the code here, check my post - [Word2vec with PyTorch: Reproducing Original Paper](https://notrocketscience.blog/word2vec-with-pytorch-implementing-original-paper/).
 
 ## Word2Vec Overview
 
