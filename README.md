@@ -77,4 +77,5 @@ Before running the command, change the training parameters in the config.yaml, m
 - dataset ("WikiText2", "WikiText103")
 - model_dir (directory to store experiment artifacts, should start with "weights/")
 
-
+## License
+This project is licensed under the terms of the [MIT license](https://choosealicense.com/licenses/mit/).
